@@ -4,15 +4,138 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SMS Phishing Detection</title>
+    <style>
+        /* Kiểu dáng cơ bản cho trang */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        /* Container chính */
+        .container {
+            background: #fff;
+            padding: 20px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+        }
+        /* Tiêu đề */
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        /* Hộp nhập nội dung SMS */
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        /* Container cho các nút */
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        /* Nút "Dự đoán" */
+        button#predict {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            flex: 1;
+            margin-right: 10px;
+        }
+        button#predict:hover {
+            background-color: #0056b3;
+        }
+        /* Nút "Xóa" */
+        button#clear {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            flex: 1;
+        }
+        button#clear:hover {
+            background-color: #c82333;
+        }
+        /* Kiểu dáng cho kết quả "Không lừa đảo" */
+        .result.safe {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 10px;
+            border: 2px solid #28a745;
+            border-radius: 5px;
+            background-color: #d4edda;
+            color: #155724;
+        }
+        /* Kiểu dáng cho kết quả "Lừa đảo" */
+        .result.phishing {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 10px;
+            border: 2px solid #dc3545;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
 </head>
 <body>
-    <h2>Phân loại SMS: Lừa đảo hay không?</h2>
-    <form action="/predict" method="post">
-        <textarea name="sms" rows="5" cols="50" placeholder="Nhập SMS tại đây..."></textarea><br><br>
-        <button type="submit">Dự đoán</button>
-    </form>
-    {% if prediction %}
-        <h3>Kết quả: {{ prediction }}</h3>
-    {% endif %}
+    <!-- Container chính -->
+    <div class="container">
+        <h2>Phân loại SMS: Lừa đảo hay không?</h2>
+        <!-- Form nhập liệu và gửi dữ liệu -->
+        <form id="smsForm" action="/predict" method="post">
+            <textarea id="smsInput" name="sms" placeholder="Nhập SMS tại đây...">{{ sms_input }}</textarea>
+            <!-- Bố cục nút -->
+            <div class="button-container">
+                <button type="submit" id="predict">Dự đoán</button>
+                <button type="button" id="clear">Xóa</button>
+            </div>
+        </form>
+        <!-- Hiển thị kết quả -->
+        {% if prediction %}
+            <div class="result {% if prediction == 'Lừa đảo' %}phishing{% else %}safe{% endif %}">
+                Kết quả: {{ prediction }}
+            </div>
+        {% endif %}
+    </div>
+    <!-- Script JavaScript để xử lý nút xóa -->
+    <script>
+        // Lấy các phần tử HTML
+        const clearButton = document.getElementById('clear');
+        const smsInput = document.getElementById('smsInput');
+        const resultDiv = document.querySelector('.result');
+
+        // Thêm sự kiện khi nhấn nút xóa
+        clearButton.addEventListener('click', () => {
+            smsInput.value = ''; // Xóa nội dung trong ô nhập
+            // Xóa kết quả dự đoán
+            if (resultDiv) {
+                resultDiv.remove();
+            }
+        });
+    </script>
 </body>
 </html>
