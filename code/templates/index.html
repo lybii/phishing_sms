@@ -1,141 +1,192 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMS Phishing Detection</title>
-    <style>
-        /* Kiểu dáng cơ bản cho trang */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        /* Container chính */
-        .container {
-            background: #fff;
-            padding: 20px 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            max-width: 500px;
-            width: 100%;
-        }
-        /* Tiêu đề */
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        /* Hộp nhập nội dung SMS */
-        textarea {
-            width: 100%;
-            height: 100px;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        /* Container cho các nút */
-        .button-container {
-            display: flex;
-            justify-content: space-between;
-        }
-        /* Nút "Dự đoán" */
-        button#predict {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            flex: 1;
-            margin-right: 10px;
-        }
-        button#predict:hover {
-            background-color: #0056b3;
-        }
-        /* Nút "Xóa" */
-        button#clear {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            flex: 1;
-        }
-        button#clear:hover {
-            background-color: #c82333;
-        }
-        /* Kiểu dáng cho kết quả "Không lừa đảo" */
-        .result.safe {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 20px;
-            font-weight: bold;
-            padding: 10px;
-            border: 2px solid #28a745;
-            border-radius: 5px;
-            background-color: #d4edda;
-            color: #155724;
-        }
-        /* Kiểu dáng cho kết quả "Lừa đảo" */
-        .result.phishing {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 20px;
-            font-weight: bold;
-            padding: 10px;
-            border: 2px solid #dc3545;
-            border-radius: 5px;
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>SMS Shield — Phát hiện SMS lừa đảo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0a0c10;--surface:#111318;--border:#1e2330;
+      --accent:#00e5a0;--accent2:#ff4c6a;--text:#e8eaf0;--muted:#6b7280;
+      --radius:12px;--mono:'Space Mono',monospace;--sans:'Syne',sans-serif;
+    }
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 16px 80px;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,160,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,160,.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+
+    nav{position:relative;z-index:10;display:flex;gap:8px;margin-bottom:36px}
+    .nav-link{font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;padding:6px 16px;border:1px solid var(--border);border-radius:999px;transition:all .2s}
+    .nav-link:hover,.nav-link.active{color:var(--accent);border-color:rgba(0,229,160,.3);background:rgba(0,229,160,.06)}
+
+    header{text-align:center;margin-bottom:40px;position:relative;z-index:1}
+    .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);border-radius:999px;padding:4px 14px;font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px}
+    .badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+    h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.1;letter-spacing:-.02em}
+    h1 span{color:var(--accent)}
+    .subtitle{margin-top:10px;color:var(--muted);font-size:15px;font-family:var(--mono)}
+
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:640px;position:relative;z-index:1}
+
+    .model-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+    .model-btn{flex:1;min-width:120px;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:var(--mono);font-size:11px;cursor:pointer;transition:all .2s;text-align:center}
+    .model-btn:hover{border-color:rgba(0,229,160,.3);color:var(--text)}
+    .model-btn.selected{border-color:var(--accent);color:var(--accent);background:rgba(0,229,160,.07)}
+    input[name=model]{display:none}
+
+    .textarea-wrap{position:relative;margin-bottom:20px}
+    .textarea-label{font-size:11px;font-family:var(--mono);color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:block}
+    textarea{width:100%;min-height:130px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:14px;line-height:1.6;padding:14px 16px;resize:vertical;transition:border-color .2s;outline:none}
+    textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,229,160,.1)}
+    textarea::placeholder{color:var(--muted)}
+    .char-count{position:absolute;bottom:10px;right:12px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+    .btn-row{display:flex;gap:10px}
+    .btn{flex:1;padding:13px;border:none;border-radius:var(--radius);font-family:var(--sans);font-weight:600;font-size:15px;cursor:pointer;transition:all .2s}
+    .btn-primary{background:var(--accent);color:#000}
+    .btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+    .btn-ghost:hover{border-color:var(--muted);color:var(--text)}
+
+    .divider{height:1px;background:var(--border);margin:28px 0}
+
+    .result-box{border-radius:var(--radius);padding:20px 22px;display:flex;flex-direction:column;gap:16px;animation:fadeUp .4s ease both}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .result-box.safe    {background:rgba(0,229,160,.07); border:1px solid rgba(0,229,160,.25)}
+    .result-box.phishing{background:rgba(255,76,106,.07);border:1px solid rgba(255,76,106,.25)}
+
+    .verdict{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+    .verdict-left{display:flex;align-items:center;gap:10px}
+    .verdict-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+    .safe     .verdict-icon{background:rgba(0,229,160,.15)}
+    .phishing .verdict-icon{background:rgba(255,76,106,.15)}
+    .verdict-label{font-size:22px;font-weight:800}
+    .safe     .verdict-label{color:var(--accent)}
+    .phishing .verdict-label{color:var(--accent2)}
+    .model-used{font-family:var(--mono);font-size:11px;color:var(--muted);padding:4px 10px;border:1px solid var(--border);border-radius:999px}
+
+    .confidence-wrap{display:flex;flex-direction:column;gap:6px}
+    .confidence-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--muted)}
+    .bar-bg{height:6px;background:var(--border);border-radius:999px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:999px;transition:width 1s cubic-bezier(.16,1,.3,1)}
+    .safe     .bar-fill{background:var(--accent)}
+    .phishing .bar-fill{background:var(--accent2)}
+
+    .keywords-section{display:flex;flex-direction:column;gap:8px}
+    .kw-label{font-size:11px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+    .kw-list{display:flex;flex-wrap:wrap;gap:6px}
+    .kw-tag{background:rgba(255,76,106,.12);border:1px solid rgba(255,76,106,.25);color:var(--accent2);border-radius:6px;padding:3px 10px;font-family:var(--mono);font-size:12px}
+
+    .api-hint{margin-top:28px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;width:100%;max-width:640px;position:relative;z-index:1}
+    .api-hint-title{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+    pre{font-family:var(--mono);font-size:12px;color:var(--accent);overflow-x:auto;line-height:1.7;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+
+    .error-msg{color:var(--accent2);font-size:13px;font-family:var(--mono);margin-top:8px}
+    footer{margin-top:48px;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;position:relative;z-index:1}
+  </style>
 </head>
 <body>
-    <!-- Container chính -->
-    <div class="container">
-        <h2>Phân loại SMS: Lừa đảo hay không?</h2>
-        <!-- Form nhập liệu và gửi dữ liệu -->
-        <form id="smsForm" action="/predict" method="post">
-            <textarea id="smsInput" name="sms" placeholder="Nhập SMS tại đây...">{{ sms_input }}</textarea>
-            <!-- Bố cục nút -->
-            <div class="button-container">
-                <button type="submit" id="predict">Dự đoán</button>
-                <button type="button" id="clear">Xóa</button>
-            </div>
-        </form>
-        <!-- Hiển thị kết quả -->
-        {% if prediction %}
-            <div class="result {% if prediction == 'Lừa đảo' %}phishing{% else %}safe{% endif %}">
-                Kết quả: {{ prediction }}
-            </div>
-        {% endif %}
-    </div>
-    <!-- Script JavaScript để xử lý nút xóa -->
-    <script>
-        // Lấy các phần tử HTML
-        const clearButton = document.getElementById('clear');
-        const smsInput = document.getElementById('smsInput');
-        const resultDiv = document.querySelector('.result');
 
-        // Thêm sự kiện khi nhấn nút xóa
-        clearButton.addEventListener('click', () => {
-            smsInput.value = ''; // Xóa nội dung trong ô nhập
-            // Xóa kết quả dự đoán
-            if (resultDiv) {
-                resultDiv.remove();
-            }
-        });
-    </script>
+<nav>
+  <a href="/" class="nav-link active">Phân tích</a>
+  <a href="/metrics" class="nav-link">Model Metrics</a>
+</nav>
+
+<header>
+  <div class="badge">ML · NLP · Flask</div>
+  <h1>SMS <span>Shield</span></h1>
+  <p class="subtitle"> Phát hiện tin nhắn lừa đảo bằng Machine Learning</p>
+</header>
+
+<div class="card">
+  <form id="smsForm" action="/predict" method="post">
+    <label class="textarea-label">Chọn Model</label>
+    <div class="model-row" id="modelRow">
+      {% for key, label in model_labels.items() %}
+      <div class="model-btn {% if (selected_model or 'random_forest') == key %}selected{% endif %}"
+           data-key="{{ key }}">{{ label }}</div>
+      {% endfor %}
+    </div>
+    <input type="hidden" name="model" id="modelInput" value="{{ selected_model or 'random_forest' }}">
+
+    <label class="textarea-label" for="smsInput">Nội dung SMS</label>
+    <div class="textarea-wrap">
+      <textarea id="smsInput" name="sms" placeholder="Dán hoặc nhập tin nhắn SMS cần kiểm tra..." oninput="updateCount(this)">{{ sms_input or '' }}</textarea>
+      <span class="char-count" id="charCount">0 ký tự</span>
+    </div>
+
+    {% if error %}<p class="error-msg">⚠ {{ error }}</p>{% endif %}
+
+    <div class="btn-row">
+      <button type="submit" class="btn btn-primary">Phân tích →</button>
+      <button type="button" class="btn btn-ghost" id="clearBtn">Xóa</button>
+    </div>
+  </form>
+
+  {% if prediction %}
+  <div class="divider"></div>
+  <div class="result-box {{ 'phishing' if is_phishing else 'safe' }}">
+    <div class="verdict">
+      <div class="verdict-left">
+        <div class="verdict-icon">{{ '⚠️' if is_phishing else '✅' }}</div>
+        <div class="verdict-label">{{ prediction }}</div>
+      </div>
+      <span class="model-used">{{ model_name }}</span>
+    </div>
+    {% if confidence is not none %}
+    <div class="confidence-wrap">
+      <div class="confidence-row">
+        <span>Độ tin cậy phishing</span>
+        <span><strong>{{ confidence }}%</strong></span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" id="confBar" style="width:0%"></div></div>
+    </div>
+    {% endif %}
+    {% if keywords %}
+    <div class="keywords-section">
+      <span class="kw-label">🔍 Từ khóa đáng ngờ phát hiện được</span>
+      <div class="kw-list">
+        {% for kw in keywords %}<span class="kw-tag">{{ kw }}</span>{% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<div class="api-hint">
+  <div class="api-hint-title">⚡ REST API — POST /api/predict</div>
+  <pre>curl -X POST http://localhost:5000/api/predict \
+  -H "Content-Type: application/json" \
+  -d '{"sms": "You have won a FREE prize!", "model": "random_forest"}'</pre>
+</div>
+
+<footer>Built with Flask · Scikit-learn · NLP pipeline · TF-IDF</footer>
+
+<script>
+  function updateCount(el){document.getElementById('charCount').textContent=el.value.length+' ký tự'}
+  const ta=document.getElementById('smsInput');
+  if(ta)updateCount(ta);
+
+  const bar=document.getElementById('confBar');
+  if(bar){setTimeout(()=>{bar.style.width='{{ confidence if confidence is not none else 0 }}%'},200)}
+
+  document.querySelectorAll('.model-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.model-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('modelInput').value=btn.dataset.key;
+    });
+  });
+
+  document.getElementById('clearBtn').addEventListener('click',()=>{
+    ta.value='';updateCount(ta);
+    document.querySelector('.result-box')?.remove();
+    document.querySelector('.divider')?.remove();
+  });
+</script>
 </body>
 </html>
